@@ -1,8 +1,9 @@
-// +build js
+//+build js
 
 package net
 
 import (
+	"context"
 	"errors"
 	"syscall"
 
@@ -10,11 +11,11 @@ import (
 )
 
 func Listen(net, laddr string) (Listener, error) {
-	panic(errors.New("network access is not supported by GopherJS"))
+	return DefaultListenFunction(net, laddr)
 }
 
-func (d *Dialer) Dial(network, address string) (Conn, error) {
-	panic(errors.New("network access is not supported by GopherJS"))
+func dialSingle(ctx context.Context, dp *dialParam, ra Addr) (c Conn, err error) {
+	return DefaultDialContextFunction(ctx, ra.Network(), ra.String())
 }
 
 func sysInit() {
@@ -63,3 +64,14 @@ func bytesIndexByte(s []byte, c byte) int {
 	}
 	return -1
 }
+
+// default listen and dial functions to allow libraries to implement simulated network stacks
+// for javascript
+var (
+	DefaultListenFunction = func(net, laddr string) (Listener, error) {
+		panic(errors.New("network access is not supported by GopherJS"))
+	}
+	DefaultDialContextFunction = func(ctx context.Context, network, address string) (Conn, error) {
+		panic(errors.New("network access is not supported by GopherJS"))
+	}
+)
