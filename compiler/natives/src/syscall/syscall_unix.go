@@ -59,16 +59,37 @@ func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno) {
 		r := f.Invoke(trap, a1, a2, a3)
 		return uintptr(r.Index(0).Int()), uintptr(r.Index(1).Int()), Errno(r.Index(2).Int())
 	}
-	if trap == SYS_WRITE && (a1 == 1 || a1 == 2) {
+	switch trap {
+	case SYS_READ:
 		array := js.InternalObject(a2)
 		slice := make([]byte, array.Length())
 		js.InternalObject(slice).Set("$array", array)
-		printToConsole(slice)
-		return uintptr(array.Length()), 0, 0
-	}
-	if trap == SYS_EXIT {
+		n, err := DefaultReadFunction(a1, slice)
+		if err != nil {
+			if e, ok := err.(Errno); ok {
+				return uintptr(minusOne), 0, e
+			} else {
+				return uintptr(minusOne), 0, EACCES
+			}
+		}
+		return uintptr(n), 0, 0
+	case SYS_WRITE:
+		array := js.InternalObject(a2)
+		slice := make([]byte, array.Length())
+		js.InternalObject(slice).Set("$array", array)
+		n, err := DefaultWriteFunction(a1, slice)
+		if err != nil {
+			if e, ok := err.(Errno); ok {
+				return uintptr(minusOne), 0, e
+			} else {
+				return uintptr(minusOne), 0, EACCES
+			}
+		}
+		return uintptr(n), 0, 0
+	case SYS_EXIT:
 		runtime.Goexit()
 	}
+
 	printWarning()
 	return uintptr(minusOne), 0, EACCES
 }

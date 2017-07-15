@@ -64,12 +64,11 @@ func GetConsoleMode(console Handle, mode *uint32) (err error) {
 }
 
 func WriteFile(handle Handle, buf []byte, done *uint32, overlapped *Overlapped) (err error) {
-	if handle == 1 || handle == 2 {
-		printToConsole(buf)
-		*done = uint32(len(buf))
-		return nil
+	n, err := DefaultWriteFunction(uintptr(handle), buf)
+	if err != nil {
+		return err
 	}
-	printWarning()
+	*done = uint32(n)
 	return nil
 }
 

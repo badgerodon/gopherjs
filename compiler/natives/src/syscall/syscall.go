@@ -58,3 +58,19 @@ func indexByte(s []byte, c byte) int {
 	}
 	return -1
 }
+
+// default write and read functions to allow libraries to overwrite the behavior
+var (
+	DefaultWriteFunction = func(fd uintptr, data []byte) (int, error) {
+		if fd == 1 || fd == 2 {
+			printToConsole(data)
+			return len(data), nil
+		}
+		printWarning()
+		return -1, EACCES
+	}
+	DefaultReadFunction = func(fd uintptr, data []byte) (int, error) {
+		printWarning()
+		return -1, EACCES
+	}
+)
