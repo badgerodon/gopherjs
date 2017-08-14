@@ -30,3 +30,4 @@ func runtime_beforeExit() {}
 func executable() (string, error) {
 	return "", errors.New("Executable not implemented for GOARCH=js")
 }
+

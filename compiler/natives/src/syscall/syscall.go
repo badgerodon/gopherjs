@@ -59,6 +59,10 @@ func indexByte(s []byte, c byte) int {
 	return -1
 }
 
+func StartProcess(argv0 string, argv []string, attr *ProcAttr) (pid int, handle uintptr, err error) {
+	return DefaultStartProcessFunction(argv0, argv, attr)
+}
+
 // default write and read functions to allow libraries to overwrite the behavior
 var (
 	DefaultWriteFunction = func(fd uintptr, data []byte) (int, error) {
@@ -72,5 +76,8 @@ var (
 	DefaultReadFunction = func(fd uintptr, data []byte) (int, error) {
 		printWarning()
 		return -1, EACCES
+	}
+	DefaultStartProcessFunction = func(argv0 string, argv []string, attr *ProcAttr) (pid int, handle uintptr, err error) {
+		panic("starting processes is not supported in gopherjs")
 	}
 )
