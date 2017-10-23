@@ -65,14 +65,6 @@ func StartProcess(argv0 string, argv []string, attr *ProcAttr) (pid int, handle 
 
 // default write and read functions to allow libraries to overwrite the behavior
 var (
-	DefaultWriteFunction = func(fd uintptr, data []byte) (int, error) {
-		if fd == 1 || fd == 2 {
-			printToConsole(data)
-			return len(data), nil
-		}
-		printWarning()
-		return -1, EACCES
-	}
 	DefaultReadFunction = func(fd uintptr, data []byte) (int, error) {
 		printWarning()
 		return -1, EACCES
@@ -81,3 +73,50 @@ var (
 		panic("starting processes is not supported in gopherjs")
 	}
 )
+
+func Open(path string, mode int, perm uint32) (fd int, err error) { 
+	return DefaultOpenFunction(path, mode, perm)
+}
+
+var (
+	DefaultOpenFunction = func(path string, mode int, perm uint32) (fd int, err error) {
+		printWarning()
+		return -1, EACCES
+	}
+)
+
+func CloseOnExec(fd int) {
+	// do nothing
+}
+
+
+func Write(fd int, p []byte) (n int, err error) {
+	return DefaultWriteFunction(fd, p)
+}
+
+var DefaultWriteFunction = func(fd int, p []byte) (int, error) {
+	if fd == 1 || fd == 2 {
+		printToConsole(p)
+		return len(p), nil
+	}
+	printWarning()
+	return -1, EACCES
+}
+
+func Close(fd int) (err error) {
+	return DefaultCloseFunction(fd)
+}
+
+var DefaultCloseFunction = func(fd int) (err error) {
+	printWarning()
+	return EACCES
+}
+
+func fcntl(fd int, cmd int, arg int) (val int, err error) {
+	return DefaultFCNTLFunction(fd, cmd, arg)
+}
+
+var DefaultFCNTLFunction = func(fd int, cmd int, arg int) (val int, err error) {
+	printWarning()
+	return -1, EACCES
+}

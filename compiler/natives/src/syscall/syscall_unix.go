@@ -61,36 +61,6 @@ func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno) {
 		return uintptr(r.Index(0).Int()), uintptr(r.Index(1).Int()), Errno(r.Index(2).Int())
 	}
 	switch trap {
-	case SYS_READ:
-		array := js.InternalObject(a2)
-		slice := make([]byte, array.Length())
-		js.InternalObject(slice).Set("$array", array)
-		n, err := DefaultReadFunction(a1, slice)
-		if err != nil {
-			if e, ok := err.(Errno); ok {
-				return uintptr(minusOne), 0, e
-			} else {
-				return uintptr(minusOne), 0, EACCES
-			}
-		}
-		return uintptr(n), 0, 0
-	case SYS_OPEN:
-		if bytePtrToString(a1) == "/dev/null" {
-			return 0, 0, 0
-		}
-	case SYS_WRITE:
-		array := js.InternalObject(a2)
-		slice := make([]byte, array.Length())
-		js.InternalObject(slice).Set("$array", array)
-		n, err := DefaultWriteFunction(a1, slice)
-		if err != nil {
-			if e, ok := err.(Errno); ok {
-				return uintptr(minusOne), 0, e
-			} else {
-				return uintptr(minusOne), 0, EACCES
-			}
-		}
-		return uintptr(n), 0, 0
 	case SYS_EXIT:
 		runtime.Goexit()
 	}
@@ -105,7 +75,8 @@ func Syscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno) 
 		r := f.Invoke(trap, a1, a2, a3, a4, a5, a6)
 		return uintptr(r.Index(0).Int()), uintptr(r.Index(1).Int()), Errno(r.Index(2).Int())
 	}
-	if trap != 202 { // kern.osrelease on OS X, happens in init of "os" package
+	switch trap {
+	case 202: // kern.osrelease on OS X, happens in init of "os" package
 		printWarning()
 	}
 	return uintptr(minusOne), 0, EACCES
