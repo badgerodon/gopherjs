@@ -63,18 +63,13 @@ func StartProcess(argv0 string, argv []string, attr *ProcAttr) (pid int, handle 
 	return DefaultStartProcessFunction(argv0, argv, attr)
 }
 
-// default write and read functions to allow libraries to overwrite the behavior
 var (
-	DefaultReadFunction = func(fd uintptr, data []byte) (int, error) {
-		printWarning()
-		return -1, EACCES
-	}
 	DefaultStartProcessFunction = func(argv0 string, argv []string, attr *ProcAttr) (pid int, handle uintptr, err error) {
 		panic("starting processes is not supported in gopherjs")
 	}
 )
 
-func Open(path string, mode int, perm uint32) (fd int, err error) { 
+func Open(path string, mode int, perm uint32) (fd int, err error) {
 	return DefaultOpenFunction(path, mode, perm)
 }
 
@@ -119,4 +114,31 @@ func fcntl(fd int, cmd int, arg int) (val int, err error) {
 var DefaultFCNTLFunction = func(fd int, cmd int, arg int) (val int, err error) {
 	printWarning()
 	return -1, EACCES
+}
+
+func Pipe2(p []int, flags int) (err error) {
+	return DefaultPipe2Function(p, flags)
+}
+
+var DefaultPipe2Function = func(p []int, flags int) error {
+	printWarning()
+	return EACCES
+}
+
+func Read(fd int, p []byte) (n int, err error) {
+	return DefaultReadFunction(fd, p)
+}
+
+var DefaultReadFunction = func(fd int, p []byte) (n int, err error) {
+	printWarning()
+	return 0, EACCES
+}
+
+func Wait4(pid int, wstatus *WaitStatus, options int, rusage *Rusage) (wpid int, err error) {
+	return DefaultWait4Function(pid, wstatus, options, rusage)
+}
+
+var DefaultWait4Function = func(pid int, wstatus *WaitStatus, options int, rusage *Rusage) (wpid int, err error) {
+	printWarning()
+	return 0, EACCES
 }

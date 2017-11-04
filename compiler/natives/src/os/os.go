@@ -25,9 +25,13 @@ func init() {
 	}
 }
 
-func runtime_beforeExit() {}
+func runtime_beforeExit() {
+}
 
 func executable() (string, error) {
 	return "", errors.New("Executable not implemented for GOARCH=js")
 }
 
+func (p *Process) blockUntilWaitable() (bool, error) {
+	return false, nil
+}

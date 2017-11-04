@@ -55,15 +55,25 @@ func syscall(name string) *js.Object {
 }
 
 func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno) {
-	js.Global.Get("console").Call("log", "SYSCALL", trap, a1, a2, a3)
 	if f := syscall("Syscall"); f != nil {
 		r := f.Invoke(trap, a1, a2, a3)
 		return uintptr(r.Index(0).Int()), uintptr(r.Index(1).Int()), Errno(r.Index(2).Int())
 	}
 	switch trap {
+	case SYS_FCNTL:
+		r, e := fcntl(int(a1), int(a2), int(a3))
+		if e != nil {
+			if errno, ok := e.(Errno); ok {
+				return uintptr(minusOne), 0, errno
+			}
+		} else {
+			return uintptr(r), 0, EACCES
+		}
 	case SYS_EXIT:
 		runtime.Goexit()
 	}
+
+	js.Global.Get("console").Call("log", "SYSCALL", trap, a1, a2, a3)
 
 	printWarning()
 	return uintptr(minusOne), 0, EACCES

@@ -145,6 +145,10 @@ var $go = function(fun, args, direct) {
             $global.process.exit(2);
           }
         }
+
+        if ($mainFinished && $global.ATEXIT) {
+          $global.ATEXIT();
+        }
       }
     }
   };
