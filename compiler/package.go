@@ -425,7 +425,7 @@ func Compile(importPath string, files []*ast.File, fileSet *token.FileSet, impor
 		}
 		funcDecls = append(funcDecls, &Decl{
 			InitCode: c.CatchOutput(1, func() {
-				c.Write()
+				c.Write(nil)
 				c.translateStmt(ifStmt, nil)
 			}),
 		})
