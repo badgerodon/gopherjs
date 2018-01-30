@@ -9,6 +9,19 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+var (
+	customHandler  func(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)
+	customHandler6 func(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)
+)
+
+func RegisterCustomHandler(handler func(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno)) {
+	customHandler = handler
+}
+
+func RegisterCustomHandler6(handler func(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno)) {
+	customHandler6 = handler
+}
+
 func runtime_envs() []string {
 	process := js.Global.Get("process")
 	if process == js.Undefined {
@@ -55,6 +68,10 @@ func syscall(name string) *js.Object {
 }
 
 func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno) {
+	if customHandler != nil {
+		return customHandler(trap, a1, a2, a3)
+	}
+
 	if f := syscall("Syscall"); f != nil {
 		r := f.Invoke(trap, a1, a2, a3)
 		return uintptr(r.Index(0).Int()), uintptr(r.Index(1).Int()), Errno(r.Index(2).Int())
@@ -74,6 +91,10 @@ func Syscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno) {
 }
 
 func Syscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno) {
+	if customHandler6 != nil {
+		return customHandler6(trap, a1, a2, a3, a4, a5, a6)
+	}
+
 	if f := syscall("Syscall6"); f != nil {
 		r := f.Invoke(trap, a1, a2, a3, a4, a5, a6)
 		return uintptr(r.Index(0).Int()), uintptr(r.Index(1).Int()), Errno(r.Index(2).Int())
@@ -85,6 +106,10 @@ func Syscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno) 
 }
 
 func RawSyscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno) {
+	if customHandler != nil {
+		return customHandler(trap, a1, a2, a3)
+	}
+
 	if f := syscall("Syscall"); f != nil {
 		r := f.Invoke(trap, a1, a2, a3)
 		return uintptr(r.Index(0).Int()), uintptr(r.Index(1).Int()), Errno(r.Index(2).Int())
@@ -94,6 +119,10 @@ func RawSyscall(trap, a1, a2, a3 uintptr) (r1, r2 uintptr, err Errno) {
 }
 
 func RawSyscall6(trap, a1, a2, a3, a4, a5, a6 uintptr) (r1, r2 uintptr, err Errno) {
+	if customHandler6 != nil {
+		return customHandler6(trap, a1, a2, a3, a4, a5, a6)
+	}
+
 	if f := syscall("Syscall6"); f != nil {
 		r := f.Invoke(trap, a1, a2, a3, a4, a5, a6)
 		return uintptr(r.Index(0).Int()), uintptr(r.Index(1).Int()), Errno(r.Index(2).Int())

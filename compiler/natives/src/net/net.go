@@ -9,12 +9,22 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+// extendable functions
+var (
+	ListenFunc = func(net, laddr string) (Listener, error) {
+		panic(errors.New("network access is not supported by GopherJS"))
+	}
+	DialFunc = func(network, address string) (Conn, error) {
+		panic(errors.New("network access is not supported by GopherJS"))
+	}
+)
+
 func Listen(net, laddr string) (Listener, error) {
-	panic(errors.New("network access is not supported by GopherJS"))
+	return ListenFunc(net, laddr)
 }
 
 func (d *Dialer) Dial(network, address string) (Conn, error) {
-	panic(errors.New("network access is not supported by GopherJS"))
+	return DialFunc(network, address)
 }
 
 func sysInit() {

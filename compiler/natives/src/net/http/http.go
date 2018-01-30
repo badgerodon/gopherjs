@@ -13,16 +13,16 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
-var DefaultTransport = func() RoundTripper {
-	switch {
-	case js.Global.Get("fetch") != js.Undefined && js.Global.Get("ReadableStream") != js.Undefined: // ReadableStream is used as a check for support of streaming response bodies, see https://fetch.spec.whatwg.org/#streams.
-		return &fetchTransport{}
-	case js.Global.Get("XMLHttpRequest") != js.Undefined:
-		return &XHRTransport{}
-	default:
-		return noTransport{}
-	}
-}()
+// var DefaultTransport = func() RoundTripper {
+// 	switch {
+// 	case js.Global.Get("fetch") != js.Undefined && js.Global.Get("ReadableStream") != js.Undefined: // ReadableStream is used as a check for support of streaming response bodies, see https://fetch.spec.whatwg.org/#streams.
+// 		return &fetchTransport{}
+// 	case js.Global.Get("XMLHttpRequest") != js.Undefined:
+// 		return &XHRTransport{}
+// 	default:
+// 		return noTransport{}
+// 	}
+// }()
 
 // noTransport is used when neither Fetch API nor XMLHttpRequest API are available. It always fails.
 type noTransport struct{}
